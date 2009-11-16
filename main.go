@@ -13,8 +13,9 @@ import ("./canvas";
 )
 
 func main() {
-	screen_width  := 1280;
-	screen_height := 720;
+	screen_width   := 1280;
+	screen_height  := 720;
+	benchmark_mode := false; //  true -> loop 50 times to benchmark
 	
 	canvas := canvas.EmptyCanvasImage(screen_width, screen_height, canvas.Color32(0xff000000));
 	
@@ -35,7 +36,7 @@ func main() {
 	g.Update();
 
 	// draw
-	drawTestScene(canvas, g, lx, ly);
+	drawTestScene(canvas, g, lx, ly, benchmark_mode);
 
 	// export image
 	outfile,e := file.WritableFile("./out.png");
@@ -127,7 +128,7 @@ func createTestMesh() *Mesh {
 	return m;
 }
 
-func drawTestScene(canvas *canvas.CanvasImage, g *gyu3d.G3DContext, lx, ly float) {
+func drawTestScene(canvas *canvas.CanvasImage, g *gyu3d.G3DContext, lx, ly float, benchmark_mode bool) {
 	mesh := createTestMesh();
 
 	// load texture
@@ -151,7 +152,9 @@ func drawTestScene(canvas *canvas.CanvasImage, g *gyu3d.G3DContext, lx, ly float
 	fmt.Printf(" start\n");
 	starttime := time.Nanoseconds();
 	
-	for k := 0;k < 50;k++{
+	var loops int;
+	if benchmark_mode {loops=50} else {loops=1}
+	for k := 0;k < loops;k++{
 		ii := 0;
 		flen := mesh.FacesCount;
 		ch := make(chan uint, flen);
@@ -160,12 +163,17 @@ func drawTestScene(canvas *canvas.CanvasImage, g *gyu3d.G3DContext, lx, ly float
 			ii += 3;
 		}
 		
+		for i := uint(0);i < flen;i++ {		
+			<- ch;
+		}
+
+/*	
 		fmt.Printf("[LOOP %d]\n", k);
 		for i := uint(0);i < flen;i++ {		
 			fmt.Printf("%d  ", <- ch);
 		}
 		fmt.Printf("\n-------------------------------------\n");
-		
+*/
 	}
 	et := time.Nanoseconds() - starttime;
 	fmt.Printf(" %d ms\n", et/1000000);

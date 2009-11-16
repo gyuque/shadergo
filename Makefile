@@ -22,4 +22,4 @@ shader.6: shader.go gyu3d.6
 
 .PHONY: clean
 clean:
-	$(RM) $(PRODUCT) main.6 canvas.6 file.6 gyu3d.6
+	$(RM) $(PRODUCT) main.6 canvas.6 file.6 gyu3d.6 shader.6
